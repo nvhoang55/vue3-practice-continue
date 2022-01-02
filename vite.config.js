@@ -1,18 +1,21 @@
 import {defineConfig} from "vite";
 import vue from "@vitejs/plugin-vue";
 import WindiCSS from "vite-plugin-windicss";
-import Components from "unplugin-vue-components/vite";
+import {quasar, transformAssetUrls} from "@quasar/vite-plugin";
 
 /**
  * https://vitejs.dev/config/
- * @type {import('vite').UserConfig}
+ * @type {import("vite").UserConfig}
  */
 export default defineConfig({
     plugins: [
-        vue(),
-        WindiCSS(),
-        Components({
-            dirs: ['src/components', 'src/components/layout'],
-        })
-    ],
+        vue({
+            template: {transformAssetUrls}
+        }),
+        quasar({
+            sassVariables: "src/quasar-variables.sass",
+            animations: 'all'
+        }),
+        WindiCSS()
+    ]
 });

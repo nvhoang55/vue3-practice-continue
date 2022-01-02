@@ -1,84 +1,152 @@
 <script setup>
-import {createUserWithEmailAndPassword, getAuth} from "firebase/auth";
 import {ref} from "vue";
+import {z} from "zod";
+import {createUserWithEmailAndPassword, getAuth} from "firebase/auth";
+
+// section  Validate schema
+const validateSchema = z.object({
+  email: z.string().nonempty("Email is required").max(32).email(),
+  password: z.string().nonempty("Password is required").min(8, "Password need to be at least 8 characters and 16 characters max"),
+  confirmPassword: z.string()
+      .nonempty("Confirm password is required")
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Confirm password does not match password",
+  path: ["confirmPassword"]
+});
 
 //section Data
-const email = ref("");
-const password = ref("");
+const formData = ref({
+  email: "",
+  password: "",
+  confirmPassword: ""
+});
+const loading = ref(false);
+const errors = ref({});
 
-const handleSubmit = () =>
+// section Handle submit
+const handleSubmit = async () =>
 {
-  console.log("email.value", email.value);
-  console.log("password.value", password.value);
-  // const auth = getAuth();
-  // createUserWithEmailAndPassword(auth, email, password)
-  //     .then((userCredential) =>
-  //     {
-  //       // Signed in
-  //       const user = userCredential.user;
-  //       // ...
-  //     })
-  //     .catch((error) =>
-  //     {
-  //       const errorCode = error.code;
-  //       const errorMessage = error.message;
-  //       // ..
-  //     });
+  // Reset errors
+  errors.value = {};
+
+  loading.value = true;
+  const validate = await validateSchema.safeParse(formData.value);
+
+  if (validate.success)
+  {
+    const auth = getAuth();
+    await createUserWithEmailAndPassword(auth, validate.data.email, validate.data.password)
+        .then((userCredential) =>
+        {
+          // Signed in
+          const user = userCredential.user;
+          console.log("user", user);
+        })
+        .catch((error) =>
+        {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log("errorCode", errorCode);
+        });
+  } else
+  {
+    errors.value = validate.error.flatten().fieldErrors;
+    console.log("errors.value", errors.value);
+  }
+  loading.value = false;
 };
 
 </script>
 
+<!-- section Template -->
 <template>
-  <div class="register-container mt-18">
-    <div class="screen">
-      <div class="screen__content">
+  <transition
+      appear
+      enter-active-class="animated animate__fadeInRight faster"
+      leave-active-class="animated animate__fadeInRight faster"
+  >
+    <div class="register-container mt-18">
+      <div class="screen">
 
-        <!--Login form-->
-        <form class="login" @submit.prevent="handleSubmit">
-          <div class="login__field">
-            <i class="iconify login__icon" data-icon="fa-solid:user"/>
-
-            <!--Username input-->
-            <input v-model="email" type="text" class="login__input" placeholder="User name / Email">
-
+        <!-- section Errors -->
+        <transition
+            appear
+            enter-active-class="animated animate__shakeX faster"
+            leave-active-class="animated animate__fadeOut faster"
+        >
+          <div v-if="Object.keys(errors).length !== 0" class="errors absolute">
+            <q-list bordered class="text-negative bg-white" separator>
+              <q-item v-for="(error, field) in errors" :key="field" v-ripple clickable>
+                <q-item-section>{{ error[0] }}</q-item-section>
+              </q-item>
+            </q-list>
           </div>
-          <div class="login__field">
-            <i class="iconify login__icon" data-icon="fa-solid:lock"/>
+        </transition>
 
-            <!--Password input>-->
-            <input v-model="password" type="password" class="login__input" placeholder="Password">
+        <div class="screen__content">
 
-          </div>
+          <!--Login form-->
+          <form class="login" @submit.prevent="handleSubmit">
+            <div class="login__field">
+              <i class="iconify login__icon" data-icon="fa-solid:user"/>
 
-          <!--Submit button-->
-          <button type="submit" class="button login__submit">
-            <span class="button__text">Log In Now</span>
-            <!--<i class="button__icon fas fa-chevron-right"></i>-->
-            <i class="iconify button__icon" data-icon="fa-solid:chevron-right"/>
-          </button>
+              <!--Username input-->
+              <input v-model="formData.email" class="login__input" placeholder="Email" type="email">
 
-        </form>
+            </div>
+            <div class="login__field">
+              <i class="iconify login__icon" data-icon="fa-solid:lock"/>
 
-        <div class="social-login">
-          <h3>log in via</h3>
-          <div class="social-icons">
-            <i class="iconify social-login__icon" data-icon="fa-brands:google"/>
-            <i class="iconify social-login__icon" data-icon="fa-brands:facebook"/>
-            <i class="iconify social-login__icon" data-icon="fa-brands:instagram"/>
+              <!--Password input>-->
+              <input v-model="formData.password" class="login__input" placeholder="Password" type="password">
+
+            </div>
+
+            <div class="login__field">
+              <i class="iconify login__icon" data-icon="fa-solid:lock"/>
+
+              <!--Confirm password input>-->
+              <input v-model="formData.confirmPassword" class="login__input" placeholder="Confirm password"
+                     type="password">
+
+            </div>
+
+            <!--Submit button-->
+            <button :disabled="loading" class="button login__submit relative" type="submit">
+              <span class="button__text">Register</span>
+              <q-inner-loading
+                  v-if="loading"
+                  :showing="loading"
+                  style="border-radius: 26px;"
+              />
+              <span class="button__icon">
+                <i class="iconify" data-icon="fa-solid:chevron-right"/>
+              </span>
+            </button>
+
+          </form>
+
+          <div class="social-login">
+            <h3>log in via</h3>
+            <div class="social-icons">
+              <i class="iconify social-login__icon" data-icon="fa-brands:google"/>
+              <i class="iconify social-login__icon" data-icon="fa-brands:facebook"/>
+              <i class="iconify social-login__icon" data-icon="fa-brands:instagram"/>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="screen__background">
-        <span class="screen__background__shape screen__background__shape4"></span>
-        <span class="screen__background__shape screen__background__shape3"></span>
-        <span class="screen__background__shape screen__background__shape2"></span>
-        <span class="screen__background__shape screen__background__shape1"></span>
+        <div class="screen__background">
+          <span class="screen__background__shape screen__background__shape4"></span>
+          <span class="screen__background__shape screen__background__shape3"></span>
+          <span class="screen__background__shape screen__background__shape2"></span>
+          <span class="screen__background__shape screen__background__shape1"></span>
+        </div>
       </div>
     </div>
-  </div>
+  </transition>
 </template>
 
-
+<!-- section Styles -->
 <style lang="scss">
 .register-container {
   display: flex;
@@ -93,6 +161,12 @@ const handleSubmit = () =>
   height: 600px;
   width: 360px;
   box-shadow: 0px 0px 24px #5C5696;
+
+  .errors {
+    left: -100%;
+    max-width: 300px;
+    min-width: 300px;
+  }
 }
 
 .screen__content {
@@ -155,8 +229,7 @@ const handleSubmit = () =>
 
 .login {
   width: 320px;
-  padding: 30px;
-  padding-top: 156px;
+  padding: 100px 30px 30px;
 }
 
 .login__field {
@@ -213,6 +286,15 @@ const handleSubmit = () =>
   cursor: pointer;
   transition: .2s;
 
+  &:disabled {
+    background: #dbdbdb;
+
+    &:hover {
+      outline: none;
+      border: 1px solid #D4D3E8;
+    }
+  }
+
   &:active {
     border-color: #6A679E;
     outline: none;
@@ -243,16 +325,21 @@ const handleSubmit = () =>
   bottom: 0px;
   right: 0px;
   color: #fff;
+
+  h3 {
+    font-size: 1.5rem;
+  }
 }
 
 .social-icons {
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .social-login__icon {
-  margin: 20px 10px;
+  margin: 8px 10px;
   color: #fff;
   text-decoration: none;
   text-shadow: 0px 0px 8px #7875B5;
