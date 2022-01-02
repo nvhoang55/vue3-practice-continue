@@ -2,13 +2,18 @@
 import {ref} from "vue";
 import {z} from "zod";
 import {createUserWithEmailAndPassword, getAuth} from "firebase/auth";
+import {useStore} from "vuex";
+import {useRouter} from "vue-router";
+import {email, password} from "../validate_schema/schema";
+
+const store = useStore();
+const router = useRouter();
 
 // section  Validate schema
 const validateSchema = z.object({
-  email: z.string().nonempty("Email is required").max(32).email(),
-  password: z.string().nonempty("Password is required").min(8, "Password need to be at least 8 characters and 16 characters max"),
-  confirmPassword: z.string()
-      .nonempty("Confirm password is required")
+  email,
+  password,
+  confirmPassword: z.string().nonempty("Confirm password is required")
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Confirm password does not match password",
   path: ["confirmPassword"]
@@ -20,7 +25,6 @@ const formData = ref({
   password: "",
   confirmPassword: ""
 });
-const loading = ref(false);
 const errors = ref({});
 
 // section Handle submit
@@ -29,7 +33,7 @@ const handleSubmit = async () =>
   // Reset errors
   errors.value = {};
 
-  loading.value = true;
+  store.state.loading = true;
   const validate = await validateSchema.safeParse(formData.value);
 
   if (validate.success)
@@ -38,22 +42,26 @@ const handleSubmit = async () =>
     await createUserWithEmailAndPassword(auth, validate.data.email, validate.data.password)
         .then((userCredential) =>
         {
-          // Signed in
-          const user = userCredential.user;
-          console.log("user", user);
+          // Signed in then save user to store
+          store.commit("user/login", {user: userCredential.user});
+
+          // Redirect to Homepage (using replace to stop user going back to register)
+          router.replace({name: "Home"});
         })
         .catch((error) =>
         {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          console.log("errorCode", errorCode);
+          // Email is already registered
+          if (error.code === "auth/email-already-in-use")
+          {
+            errors.value.email = ["This email is already registered. Please try another email."];
+          }
         });
   } else
   {
     errors.value = validate.error.flatten().fieldErrors;
     console.log("errors.value", errors.value);
   }
-  loading.value = false;
+  store.state.loading = false;
 };
 
 </script>
@@ -63,7 +71,7 @@ const handleSubmit = async () =>
   <transition
       appear
       enter-active-class="animated animate__fadeInRight faster"
-      leave-active-class="animated animate__fadeInRight faster"
+      leave-active-class="animated animate__fadeOutRight faster"
   >
     <div class="register-container mt-18">
       <div class="screen">
@@ -112,11 +120,11 @@ const handleSubmit = async () =>
             </div>
 
             <!--Submit button-->
-            <button :disabled="loading" class="button login__submit relative" type="submit">
+            <button :disabled="store.state.loading" class="button login__submit relative" type="submit">
               <span class="button__text">Register</span>
               <q-inner-loading
-                  v-if="loading"
-                  :showing="loading"
+                  v-if="store.state.loading"
+                  :showing="store.state.loading"
                   style="border-radius: 26px;"
               />
               <span class="button__icon">

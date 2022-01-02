@@ -1,18 +1,20 @@
-import { createApp } from 'vue'
-import { createStore } from 'vuex'
+import {createStore} from "vuex";
+import user from "./user";
 
 // Create a new store instance.
 const store = createStore({
-    state () {
-        return {
-            count: 0
-        }
-    },
+    state: () => ({
+       loading: false,
+    }),
     mutations: {
-        increment (state) {
-            state.count++
-        }
+      setLoading(state, payload)
+      {
+          state.loading = payload.isLoading;
+      }
+    },
+    modules: {
+        user
     }
-})
+});
 
 export default store;

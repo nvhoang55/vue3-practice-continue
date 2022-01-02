@@ -1,42 +1,19 @@
-<script setup></script>
+<script setup>
+import Footer from "./components/layout/Footer.vue";
+import Header from "./components/layout/Header.vue";
+</script>
 
 <template>
   <q-layout view="hHh lpR fff">
 
-    <!-- section Header-->
-    <q-header class="text-white header" elevated>
-      <q-toolbar>
-        <q-toolbar-title>
-          <router-link :to="{name: 'Home'}">
+    <Header/>
 
-            <q-avatar>
-              <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
-            </q-avatar>
-            Back to Home
-          </router-link>
-        </q-toolbar-title>
-        <router-link :to="{name: 'Login'}">
-          <q-btn flat icon="login" label="Login" rounded/>
-        </router-link>
-        <router-link :to="{name: 'Register'}">
-          <q-btn flat icon="feed" label="Register" rounded/>
-        </router-link>
-      </q-toolbar>
-    </q-header>
+    <!-- section Main -->
+    <q-page-container>
+      <router-view/>
+    </q-page-container>
 
-      <!-- section Main -->
-      <q-page-container>
-        <router-view/>
-      </q-page-container>
-
-    <!-- section Footer -->
-    <q-footer class="footer text-dark text-center" elevated>
-      <q-toolbar>
-        <q-toolbar-title>
-          <div class="text-base">Demo VueJS @Hoang</div>
-        </q-toolbar-title>
-      </q-toolbar>
-    </q-footer>
+    <Footer/>
 
   </q-layout>
 </template>
