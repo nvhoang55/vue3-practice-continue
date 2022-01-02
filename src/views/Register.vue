@@ -1,7 +1,6 @@
 <script setup>
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import {z} from "zod";
-import {createUserWithEmailAndPassword, getAuth} from "firebase/auth";
 import {useStore} from "vuex";
 import {useRouter} from "vue-router";
 import {email, password} from "../validate_schema/schema";
@@ -25,44 +24,30 @@ const formData = ref({
   password: "",
   confirmPassword: ""
 });
-const errors = ref({});
 
 // section Handle submit
 const handleSubmit = async () =>
 {
-  // Reset errors
-  errors.value = {};
-
   store.state.loading = true;
   const validate = await validateSchema.safeParse(formData.value);
 
   if (validate.success)
   {
-    const auth = getAuth();
-    await createUserWithEmailAndPassword(auth, validate.data.email, validate.data.password)
-        .then((userCredential) =>
+    const {email, password} = validate.data;
+    await store.dispatch("user/register", {email, password})
+        .then(() =>
         {
-          // Signed in then save user to store
-          store.commit("user/login", {user: userCredential.user});
-
-          // Redirect to Homepage (using replace to stop user going back to register)
           router.replace({name: "Home"});
-        })
-        .catch((error) =>
-        {
-          // Email is already registered
-          if (error.code === "auth/email-already-in-use")
-          {
-            errors.value.email = ["This email is already registered. Please try another email."];
-          }
         });
-  } else
+  }
+  else
   {
-    errors.value = validate.error.flatten().fieldErrors;
-    console.log("errors.value", errors.value);
+    store.commit("user/setErrors", {errors: validate.error.flatten().fieldErrors});
   }
   store.state.loading = false;
 };
+
+const errors = computed(() => store.state.user.errors);
 
 </script>
 

@@ -1,7 +1,6 @@
 <script setup>
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import {z} from "zod";
-import {getAuth, signInWithEmailAndPassword} from "firebase/auth";
 import {useStore} from "vuex";
 import {useRouter} from "vue-router";
 import {email, password} from "../validate_schema/schema";
@@ -12,7 +11,7 @@ const router = useRouter();
 // section  Validate schema
 const validateSchema = z.object({
   email,
-  password,
+  password
 });
 
 //section Data
@@ -20,44 +19,30 @@ const formData = ref({
   email: "",
   password: ""
 });
-const errors = ref({});
 
 // section Handle submit
 const handleSubmit = async () =>
 {
-  // Reset errors
-  errors.value = {};
-
   store.state.loading = true;
   const validate = await validateSchema.safeParse(formData.value);
 
   if (validate.success)
   {
-    const auth = getAuth();
-    signInWithEmailAndPassword(auth, validate.data.email, validate.data.password)
-        .then((userCredential) =>
+    const {email, password} = validate.data;
+    await store.dispatch("user/login", {email, password})
+        .then(() =>
         {
-          // Signed in then save user to store
-          store.commit("user/login", {user: userCredential.user});
-
-          // Redirect to Homepage (using replace to stop user going back to register)
           router.replace({name: "Home"});
-        })
-        .catch((error) =>
-        {
-          // Wrong credential
-          if (error.code === "auth/wrong-password")
-          {
-            errors.value.email = ["Wrong email or password. Please try again. "];
-          }
         });
-  } else
+  }
+  else
   {
-    errors.value = validate.error.flatten().fieldErrors;
-    console.log("errors.value", errors.value);
+    store.commit("user/setErrors", {errors: validate.error.flatten().fieldErrors});
   }
   store.state.loading = false;
 };
+
+const errors = computed(() => store.state.user.errors);
 
 </script>
 

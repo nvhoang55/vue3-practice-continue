@@ -1,7 +1,17 @@
 <script setup>
 import {useStore} from "vuex";
+import {useRouter} from "vue-router";
 
 const store = useStore();
+const router = useRouter();
+const logout = async () =>
+{
+  await store.dispatch("user/logout")
+      .then(() =>
+      {
+        router.replace({name: "Home"});
+      });
+};
 </script>
 
 <template>
@@ -17,21 +27,24 @@ const store = useStore();
         </router-link>
       </q-toolbar-title>
 
-      <!--Logout-->
-      <router-link v-if="store.state.user.isLogin" :to="{name: 'Logout'}">
-        <q-btn flat icon="logout" label="Logout" rounded/>
-      </router-link>
-      <div v-else>
-        <!--Login-->
-        <router-link :to="{name: 'Login'}">
-          <q-btn flat icon="login" label="Login" rounded/>
-        </router-link>
+      <transition-group
+          appear
+          enter-active-class="animated animate__fadeIn faster"
+      >
+        <!--Logout-->
+        <q-btn v-if="store.state.user.isLogin" flat icon="logout" label="Logout" rounded @click="logout"/>
+        <div v-else>
+          <!--Login-->
+          <router-link :to="{name: 'Login'}">
+            <q-btn flat icon="login" label="Login" rounded/>
+          </router-link>
 
-        <!--Register-->
-        <router-link :to="{name: 'Register'}">
-          <q-btn flat icon="feed" label="Register" rounded/>
-        </router-link>
-      </div>
+          <!--Register-->
+          <router-link :to="{name: 'Register'}">
+            <q-btn flat icon="feed" label="Register" rounded/>
+          </router-link>
+        </div>
+      </transition-group>
 
     </q-toolbar>
   </q-header>
