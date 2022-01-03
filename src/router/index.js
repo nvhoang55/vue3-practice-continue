@@ -3,6 +3,7 @@ import Home from "../views/Home.vue";
 import Login from "../views/Login.vue";
 import Register from "../views/Register.vue";
 import UpdateProfile from "../views/UpdateProfile.vue";
+import NotFound from "../views/NotFound.vue";
 
 const routes = [
     {
@@ -25,6 +26,11 @@ const routes = [
         name: "UpdateProfile",
         component: UpdateProfile
     },
+    {
+        path: "/:pathMatch(.*)*",
+        name: "NotFound",
+        component: NotFound
+    }
 
 ];
 
