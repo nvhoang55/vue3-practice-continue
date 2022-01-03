@@ -72,7 +72,7 @@ const errors = computed(() => store.state.user.errors);
             input.login__input(v-model='formData.password' placeholder='Password' type='password')
 
           // Submit button
-          button.button.login__submit.relative(:disabled='store.state.loading' type='submit')
+          button.button.login__submit.relative-position(:disabled='store.state.loading' type='submit')
             span.button__text Login
             span.button__icon
               i.iconify(data-icon='fa-solid:chevron-right')

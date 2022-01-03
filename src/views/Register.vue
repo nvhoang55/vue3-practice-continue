@@ -78,7 +78,7 @@ const errors = computed(() => store.state.user.errors);
             input.login__input(v-model='formData.confirmPassword' placeholder='Confirm password' type='password')
 
           // Submit button
-          button.button.login__submit.relative(:disabled='store.state.loading' type='submit')
+          button.button.login__submit.relative-position(:disabled='store.state.loading' type='submit')
             span.button__text Register
             q-inner-loading(v-if='store.state.loading' :showing='store.state.loading' style='border-radius: 26px;')
             span.button__icon
