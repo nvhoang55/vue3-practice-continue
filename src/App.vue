@@ -14,7 +14,7 @@ q-layout(view='hHh lpR fff')
   Header
 
   q-page-container
-    q-page()
+    q-page(padding)
       router-view
 
   Footer

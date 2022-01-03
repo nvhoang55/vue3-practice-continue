@@ -47,7 +47,8 @@ const handleSubmit = async () =>
           quasar.notify({
             message: `Welcome new user, ${store.state.user.user.email}`,
             position: "top",
-            class: "text-lg"
+            class: "text-lg",
+            timeout: 2000,
           });
         });
   }
@@ -65,7 +66,7 @@ const errors = computed(() => store.state.user.errors);
 <!-- section Template -->
 <template lang="pug">
 .register-container.center
-  transition(appear='' enter-active-class='animated animate__fadeInDown faster' leave-active-class='animated animate__fadeOutUp faster')
+  transition(mode='out-in' appear enter-active-class='animated animate__fadeInDown faster' leave-active-class='animated animate__fadeOutUp faster')
     .screen
       transition(appear='' enter-active-class='animated animate__shakeX faster' leave-active-class='animated animate__fadeOut faster')
         .errors.absolute(v-if="store.getters['user/hasError']")
