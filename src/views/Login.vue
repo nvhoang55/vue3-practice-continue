@@ -2,14 +2,10 @@
 import {computed, ref} from "vue";
 import {z} from "zod";
 import {useStore} from "vuex";
-import {useRouter} from "vue-router";
 import {email, password} from "../validate_schema/schema";
-import {useQuasar} from "quasar";
 
 
 const store = useStore();
-const router = useRouter();
-const quasar = useQuasar();
 
 // section  Validate schema
 const validateSchema = z.object({
@@ -36,16 +32,6 @@ const handleSubmit = async () =>
   {
     const {email, password} = validate.data;
     await store.dispatch("user/login", {email, password})
-        .then(() =>
-        {
-          router.replace({name: "Home"});
-          quasar.notify({
-            message: `Welcome back, ${store.state.user.user.email}`,
-            position: "top",
-            class: "text-lg",
-            timeout: 2000,
-          });
-        });
   }
   else
   {
@@ -88,9 +74,9 @@ const errors = computed(() => store.state.user.errors);
           // Submit button
           button.button.login__submit.relative(:disabled='store.state.loading' type='submit')
             span.button__text Login
+            span.button__icon
+              i.iconify(data-icon='fa-solid:chevron-right')
             q-inner-loading(v-if='store.state.loading' :showing='store.state.loading' style='border-radius: 26px;')
-              span.button__icon
-                i.iconify(data-icon='fa-solid:chevron-right')
 
         .social-login
           h3 log in via

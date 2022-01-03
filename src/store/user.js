@@ -1,5 +1,7 @@
 import {createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut} from "firebase/auth";
 import {auth} from "../Firebase/setup";
+import router from "../router";
+import { Notify } from 'quasar'
 
 export default {
     namespaced: true,
@@ -45,6 +47,17 @@ export default {
                     // Signed in then save user to store
                     context.commit("setUser", {user: userCredential.user});
                     context.commit("setLogin", {isLogin: true});
+
+                    // Redirect
+                    router.replace({name: "Home"});
+                    // Notify
+                    Notify.create({
+                        message: `Welcome new user, ${state.user.email}`,
+                        position: "top",
+                        class: "text-lg",
+                        timeout: 2000
+                    });
+
                 })
                 .catch((error) =>
                 {
@@ -64,6 +77,17 @@ export default {
                     // Signed in then save user to store
                     context.commit("setUser", {user: userCredential.user});
                     context.commit("setLogin", {isLogin: true});
+
+                    // Redirect
+                    router.replace({name: "Home"});
+                    // Notify
+                    Notify.create({
+                        message: `Welcome new user, ${state.user.email}`,
+                        position: "top",
+                        class: "text-lg",
+                        timeout: 2000
+                    });
+
                 })
                 .catch((error) =>
                 {
@@ -83,6 +107,14 @@ export default {
                     // Sign-out successful.
                     context.commit("setLogin", {isLogin: false});
                     context.commit("setUser", {user: null});
+
+                    // Notify
+                    Notify.create({
+                        message: `Goodbye, see you soon.`,
+                        position: "top",
+                        class: "text-lg",
+                        timeout: 2000
+                    });
                 })
                 .catch((error) =>
                 {

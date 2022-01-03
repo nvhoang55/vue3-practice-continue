@@ -2,13 +2,9 @@
 import {computed, ref} from "vue";
 import {z} from "zod";
 import {useStore} from "vuex";
-import {useRouter} from "vue-router";
 import {email, password} from "../validate_schema/schema";
-import {useQuasar} from "Quasar";
 
 const store = useStore();
-const router = useRouter();
-const quasar = useQuasar();
 
 // section  Validate schema
 const validateSchema = z.object({
@@ -39,18 +35,7 @@ const handleSubmit = async () =>
   if (validate.success)
   {
     const {email, password} = validate.data;
-
-    await store.dispatch("user/register", {email, password})
-        .then(() =>
-        {
-          router.replace({name: "Home"});
-          quasar.notify({
-            message: `Welcome new user, ${store.state.user.user.email}`,
-            position: "top",
-            class: "text-lg",
-            timeout: 2000,
-          });
-        });
+    await store.dispatch("user/register", {email, password});
   }
   else
   {
@@ -96,15 +81,8 @@ const errors = computed(() => store.state.user.errors);
           button.button.login__submit.relative(:disabled='store.state.loading' type='submit')
             span.button__text Register
             q-inner-loading(v-if='store.state.loading' :showing='store.state.loading' style='border-radius: 26px;')
-              span.button__icon
-                i.iconify(data-icon='fa-solid:chevron-right')
-
-        .social-login
-          h3 log in via
-          .social-icons
-            i.iconify.social-login__icon(data-icon='fa-brands:google')
-            i.iconify.social-login__icon(data-icon='fa-brands:facebook')
-            i.iconify.social-login__icon(data-icon='fa-brands:instagram')
+            span.button__icon
+              i.iconify(data-icon='fa-solid:chevron-right')
 
       .screen__background
         span.screen__background__shape.screen__background__shape4
