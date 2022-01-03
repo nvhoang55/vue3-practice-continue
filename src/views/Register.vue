@@ -3,6 +3,7 @@ import {computed, ref} from "vue";
 import {z} from "zod";
 import {useStore} from "vuex";
 import {email, password} from "../validate_schema/schema";
+import {onBeforeRouteLeave} from "vue-router";
 
 const store = useStore();
 
@@ -43,6 +44,15 @@ const handleSubmit = async () =>
   }
   store.state.loading = false;
 };
+
+// Remove errors before navigating
+onBeforeRouteLeave(() =>
+{
+  if (store.getters["user/hasError"])
+  {
+    store.commit("user/setErrors", {errors: {}});
+  }
+});
 
 const errors = computed(() => store.state.user.errors);
 
