@@ -31,7 +31,7 @@ const handleSubmit = async () =>
   if (validate.success)
   {
     const {email, password} = validate.data;
-    await store.dispatch("user/login", {email, password})
+    await store.dispatch("user/login", {email, password});
   }
   else
   {
