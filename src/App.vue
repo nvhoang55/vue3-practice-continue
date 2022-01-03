@@ -1,6 +1,12 @@
 <script setup>
 import Footer from "./components/layout/Footer.vue";
 import Header from "./components/layout/Header.vue";
+import {useStore} from "vuex";
+
+// Authenticate user on page reload
+const store = useStore();
+store.dispatch("user/checkAuthState");
+
 </script>
 
 <template>

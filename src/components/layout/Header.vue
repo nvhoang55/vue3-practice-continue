@@ -28,6 +28,7 @@ const logout = async () =>
       </q-toolbar-title>
 
       <transition-group
+          v-if="store.state.user.isAuthReady"
           appear
           enter-active-class="animated animate__fadeIn faster"
       >

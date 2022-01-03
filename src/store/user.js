@@ -1,13 +1,16 @@
-import {createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut} from "firebase/auth";
+import {createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut} from "firebase/auth";
 import {auth} from "../Firebase/setup";
 
 export default {
     namespaced: true,
+    // section State
     state: () => ({
         user: null,
         isLogin: false,
-        errors: {}
+        errors: {},
+        isAuthReady: false
     }),
+    // section Mutations
     mutations: {
         setUser(state, {user})
         {
@@ -20,9 +23,14 @@ export default {
         setErrors(state, {errors})
         {
             state.errors = errors;
+        },
+        setIsAuthReady(state, {isAuthReady})
+        {
+            state.isAuthReady = isAuthReady;
         }
     },
     actions: {
+        // section Register
         async register(context, {email, password})
         {
             // Reset errors each time login
@@ -43,6 +51,7 @@ export default {
                     }
                 });
         },
+        // section Login
         async login(context, {email, password})
         {
             // Reset errors each time login
@@ -63,6 +72,7 @@ export default {
                     }
                 });
         },
+        // section Logout
         async logout(context)
         {
             await signOut(auth)
@@ -76,6 +86,28 @@ export default {
                 {
                     // An error happened.
                 });
+        },
+        // section Check auth
+        async checkAuthState(context)
+        {
+            // onAuthStateChanged return unsub function
+            const unsub = await onAuthStateChanged(auth, async (user) =>
+            {
+                if (user)
+                {
+                    context.commit("setUser", {user});
+                    context.commit("setLogin", {isLogin: true});
+                }
+                else
+                {
+                    // User is signed out
+                    await context.dispatch("logout");
+                    context.commit("setLogin", {isLogin: false});
+                }
+
+                context.commit("setIsAuthReady", {isAuthReady: true});
+                unsub();
+            });
         }
     }
 };
