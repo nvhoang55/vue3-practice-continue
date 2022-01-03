@@ -8,7 +8,9 @@ import "./Firebase/setup";
 import "virtual:windi.css";
 import 'virtual:windi-devtools'
 // Import icon libraries
-import "@quasar/extras/roboto-font/roboto-font.css";
+import '@quasar/extras/roboto-font/roboto-font.css'
+import '@quasar/extras/material-icons/material-icons.css'
+import '@quasar/extras/fontawesome-v5/fontawesome-v5.css'
 // Quasar
 import {Notify, Quasar} from "quasar";
 import "quasar/dist/quasar.css";
