@@ -4,9 +4,12 @@ import {z} from "zod";
 import {useStore} from "vuex";
 import {useRouter} from "vue-router";
 import {email, password} from "../validate_schema/schema";
+import {useQuasar} from "quasar";
+
 
 const store = useStore();
 const router = useRouter();
+const quasar = useQuasar();
 
 // section  Validate schema
 const validateSchema = z.object({
@@ -23,6 +26,9 @@ const formData = ref({
 // section Handle submit
 const handleSubmit = async () =>
 {
+  // Reset errors
+  store.commit("user/setErrors", {errors: {}});
+
   store.state.loading = true;
   const validate = await validateSchema.safeParse(formData.value);
 
@@ -33,6 +39,11 @@ const handleSubmit = async () =>
         .then(() =>
         {
           router.replace({name: "Home"});
+          quasar.notify({
+            message: `Welcome back, ${store.state.user.user.email}`,
+            position: "top",
+            class: "text-lg"
+          });
         });
   }
   else
@@ -47,82 +58,51 @@ const errors = computed(() => store.state.user.errors);
 </script>
 
 <!-- section Template -->
-<template>
-  <transition
-      appear
-      enter-active-class="animated animate__fadeInLeft faster"
-      leave-active-class="animated animate__fadeOutLeft faster"
-  >
-    <div class="register-container mt-18">
-      <div class="screen">
+<template lang="pug">
+.register-container.center
+  transition(appear='' enter-active-class='animated animate__fadeInDown faster' leave-active-class='animated animate__fadeOutUp faster')
+    .screen
 
-        <!-- section Errors -->
-        <transition
-            appear
-            enter-active-class="animated animate__shakeX faster"
-            leave-active-class="animated animate__fadeOut faster"
-        >
-          <div v-if="Object.keys(errors).length !== 0" class="errors absolute">
-            <q-list bordered class="text-negative bg-white" separator>
-              <q-item v-for="(error, field) in errors" :key="field" v-ripple clickable>
-                <q-item-section>{{ error[0] }}</q-item-section>
-              </q-item>
-            </q-list>
-          </div>
-        </transition>
+      // section Errors
+      transition(appear='' enter-active-class='animated animate__shakeX faster' leave-active-class='animated animate__fadeOut faster')
+        .errors.absolute(v-if="store.getters['user/hasError']")
+          q-list.text-negative.bg-white(bordered='' separator='')
+            q-item(v-for='(error, field) in errors' :key='field' v-ripple='' clickable='')
+              q-item-section {{ error[0] }}
 
-        <div class="screen__content">
+      .screen__content
+        // Login form
+        form.login(@submit.prevent='handleSubmit')
+          .login__field
+            i.iconify.login__icon(data-icon='fa-solid:user')
 
-          <!--Login form-->
-          <form class="login" @submit.prevent="handleSubmit">
-            <div class="login__field">
-              <i class="iconify login__icon" data-icon="fa-solid:user"/>
+            // Username input
+            input.login__input(v-model='formData.email' placeholder='Email' type='email')
+          .login__field
+            i.iconify.login__icon(data-icon='fa-solid:lock')
 
-              <!--Username input-->
-              <input v-model="formData.email" class="login__input" placeholder="Email" type="email">
+            // Password input>
+            input.login__input(v-model='formData.password' placeholder='Password' type='password')
 
-            </div>
-            <div class="login__field">
-              <i class="iconify login__icon" data-icon="fa-solid:lock"/>
+          // Submit button
+          button.button.login__submit.relative(:disabled='store.state.loading' type='submit')
+            span.button__text Login
+            q-inner-loading(v-if='store.state.loading' :showing='store.state.loading' style='border-radius: 26px;')
+              span.button__icon
+                i.iconify(data-icon='fa-solid:chevron-right')
 
-              <!--Password input>-->
-              <input v-model="formData.password" class="login__input" placeholder="Password" type="password">
+        .social-login
+          h3 log in via
+          .social-icons
+            i.iconify.social-login__icon(data-icon='fa-brands:google')
+            i.iconify.social-login__icon(data-icon='fa-brands:facebook')
+            i.iconify.social-login__icon(data-icon='fa-brands:instagram')
 
-            </div>
-
-            <!--Submit button-->
-            <button :disabled="store.state.loading" class="button login__submit relative" type="submit">
-              <span class="button__text">Login</span>
-              <q-inner-loading
-                  v-if="store.state.loading"
-                  :showing="store.state.loading"
-                  style="border-radius: 26px;"
-              />
-              <span class="button__icon">
-                <i class="iconify" data-icon="fa-solid:chevron-right"/>
-              </span>
-            </button>
-
-          </form>
-
-          <div class="social-login">
-            <h3>log in via</h3>
-            <div class="social-icons">
-              <i class="iconify social-login__icon" data-icon="fa-brands:google"/>
-              <i class="iconify social-login__icon" data-icon="fa-brands:facebook"/>
-              <i class="iconify social-login__icon" data-icon="fa-brands:instagram"/>
-            </div>
-          </div>
-        </div>
-        <div class="screen__background">
-          <span class="screen__background__shape screen__background__shape4"></span>
-          <span class="screen__background__shape screen__background__shape3"></span>
-          <span class="screen__background__shape screen__background__shape2"></span>
-          <span class="screen__background__shape screen__background__shape1"></span>
-        </div>
-      </div>
-    </div>
-  </transition>
+      .screen__background
+        span.screen__background__shape.screen__background__shape4
+        span.screen__background__shape.screen__background__shape3
+        span.screen__background__shape.screen__background__shape2
+        span.screen__background__shape.screen__background__shape1
 </template>
 
 <!-- section Styles -->

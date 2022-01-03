@@ -7,16 +7,20 @@ import "./Firebase/setup";
 //WindiCSS
 import "virtual:windi.css";
 //Vuestic
-import {Quasar} from "quasar";
+import {Notify, Quasar} from "quasar";
 // Import icon libraries
 import "@quasar/extras/roboto-font/roboto-font.css";
 // Import Quasar css
 import "quasar/dist/quasar.css";
 //Animations from Animate.css:
-import 'animate.css';
+import "animate.css";
 
 createApp(App)
-    .use(Quasar)
+    .use(Quasar, {
+        plugins: {
+            Notify
+        }
+    })
     .use(router)
     .use(store)
     .mount("#app");

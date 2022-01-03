@@ -10,6 +10,12 @@ export default {
         errors: {},
         isAuthReady: false
     }),
+    getters: {
+        hasError(state)
+        {
+            return Object.keys(state.errors).length !== 0;
+        }
+    },
     // section Mutations
     mutations: {
         setUser(state, {user})
@@ -33,8 +39,6 @@ export default {
         // section Register
         async register(context, {email, password})
         {
-            // Reset errors each time login
-            context.commit("setErrors", {errors: {}});
             await createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) =>
                 {
@@ -54,8 +58,6 @@ export default {
         // section Login
         async login(context, {email, password})
         {
-            // Reset errors each time login
-            context.commit("setErrors", {errors: {}});
             await signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) =>
                 {
